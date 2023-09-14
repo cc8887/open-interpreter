@@ -440,6 +440,9 @@ class Interpreter:
               print(Rule(style="white"))
 
       litellm.api_key = self.api_key
+      if self.api_base== None:
+        if 'OPENAI_BASE' in os.environ:
+          self.api_base = os.getenv('OPENAI_BASE')
       if self.api_base:
         litellm.api_base = self.api_base
 
@@ -474,8 +477,8 @@ class Interpreter:
     # Make LLM call
     if not self.local:
       # GPT
-      
-      error = ""
+
+      error = ""+self.api_base
       
       for _ in range(3):  # 3 retries
         try:
@@ -816,7 +819,9 @@ class Interpreter:
             "name": "run_code",
             "content": self.active_block.output if self.active_block.output else "No output"
           })
-
+          #OpenAIComplete can't access None in 'content'
+          if(self.messages[-2]['content'] == None):
+            self.messages[-2]['content'] = ""
           # Go around again
           self.respond()
 
